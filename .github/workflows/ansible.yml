@@ -1,0 +1,35 @@
+name: Ansible Provisioning
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Ansible
+        run: python -m pip install ansible
+
+      - name: Show Ansible version
+        run: ansible --version
+
+      - name: Ping web host
+        run: ansible web -i ansible/inventory.ini -m ping
+
+      - name: Run nginx playbook
+        run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
+
+      - name: Run playbook again to demonstrate idempotence
+        run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
+
+      - name: Verify nginx default page
+        run: curl --fail http://127.0.0.1/
